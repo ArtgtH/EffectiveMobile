@@ -2,6 +2,7 @@
 
 ### Стек
 - Gin
+- Gorm
 - PostgreSQL
 - Docker
 - docker-compose
