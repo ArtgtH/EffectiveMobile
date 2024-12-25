@@ -9,6 +9,7 @@
 
 ### Запуск
 ```cp .env.example .env```
+
 ```docker-compose up --build```
 
 ### Генерация документации 
