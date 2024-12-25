@@ -1,0 +1,75 @@
+definitions:
+  models.SongRequest:
+    properties:
+      group_name:
+        type: string
+      title:
+        type: string
+    type: object
+  models.SongResponse:
+    properties:
+      group_name:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/songs:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SongResponse'
+      summary: Return all songs
+      tags:
+      - Songs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Song DTO
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.SongRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SongResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create song
+      tags:
+      - Songs
+  /api/songs/{id}:
+    get:
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SongResponse'
+      summary: Return song by given ID
+      tags:
+      - Songs
+swagger: "2.0"

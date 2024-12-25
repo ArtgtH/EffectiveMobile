@@ -1,0 +1,36 @@
+version: "3.8"
+
+networks:
+  dev:
+
+services:
+  postgres:
+    image: postgres:16
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "Songs"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dev
+
+  api:
+    build: .
+    container_name: api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+    depends_on:
+      - postgres
+    networks:
+      - dev
+
+volumes:
+  postgres_data:
