@@ -2,6 +2,9 @@ package app
 
 import (
 	"EffectiveMobile/src/app/handlers"
+	"EffectiveMobile/src/app/services"
+	"EffectiveMobile/src/database"
+	"EffectiveMobile/src/database/repositories"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -17,21 +20,33 @@ import (
 // @schemes http
 
 func InitRouter() *gin.Engine {
-	router := gin.Default()
+	db := database.DB
 
+	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	groupRepo := repositories.NewGroupRepository(db)
+	songRepo := repositories.NewSongRepository(db)
+
+	groupService := services.NewGroupService(groupRepo)
+	songService := services.NewSongService(songRepo, groupRepo)
+
+	groupHandler := handlers.NewGroupHandler(groupService)
+	songHandler := handlers.NewSongHandler(songService, groupService)
+
 	api := router.Group("/api")
 	{
-		api.GET("/songs/:id", handlers.GetSong)
-		api.GET("/groups/:id", handlers.GetGroup)
-		api.GET("/songs", handlers.GetSongs)
-		api.GET("/groups", handlers.GetGroups)
-		api.POST("/groups", handlers.CreateGroup)
-		api.POST("/songs", handlers.CreateSong)
+		api.GET("/groups/:id", groupHandler.GetGroup)
+		api.GET("/groups", groupHandler.GetGroups)
+		api.POST("/groups", groupHandler.CreateGroup)
+	}
+	{
+		api.GET("/songs/:id", songHandler.GetSong)
+		api.GET("/songs", songHandler.GetSongs)
+		api.POST("/songs", songHandler.CreateSong)
 	}
 
 	return router

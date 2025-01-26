@@ -1,4 +1,19 @@
 definitions:
+  models.GroupRequest:
+    type: object
+  models.GroupResponse:
+    properties:
+      id:
+        type: integer
+      songs:
+        items:
+          $ref: '#/definitions/models.Song'
+        type: array
+      title:
+        type: string
+    type: object
+  models.Song:
+    type: object
   models.SongRequest:
     properties:
       group_name:
@@ -18,6 +33,60 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/groups:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupResponse'
+      summary: Return all groups
+      tags:
+      - Groups
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group DTO
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/models.GroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.GroupResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create group
+      tags:
+      - Groups
+  /api/groups/{id}:
+    get:
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupResponse'
+      summary: Return group by given ID
+      tags:
+      - Groups
   /api/songs:
     get:
       produces:

@@ -1,52 +1,83 @@
 package handlers
 
 import (
-	"EffectiveMobile/src/database"
+	"EffectiveMobile/src/app/services"
 	"EffectiveMobile/src/database/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
-func CreateGroup(c *gin.Context) {
-	db := database.DB
-	group := models.GroupDTO{}
+type GroupHandler struct {
+	groupService *services.GroupService
+}
+
+func NewGroupHandler(groupService *services.GroupService) *GroupHandler {
+	return &GroupHandler{groupService: groupService}
+}
+
+// CreateGroup godoc
+// @Tags Groups
+// @Summary Create group
+// @Accept json
+// @Produce json
+// @Param group body models.GroupRequest true "Group DTO"
+// @Success 201 {object} models.GroupResponse
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /api/groups [post]
+func (h *GroupHandler) CreateGroup(c *gin.Context) {
+	group := models.GroupRequest{}
 
 	if err := c.ShouldBindJSON(&group); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newGroup := models.Group{
-		Title: group.Title,
-		Songs: []models.Song{},
-	}
-
-	if err := db.Create(&newGroup).Error; err != nil {
+	resGroup, err := h.groupService.CreateGroup(group)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newGroup})
+	c.JSON(http.StatusCreated, gin.H{"data": resGroup})
 }
 
-func GetGroup(c *gin.Context) {
-	db := database.DB
+// GetGroup godoc
+// @Tags Groups
+// @Summary Return group by given ID
+// @Produce json
+// @Param id path integer true "Group ID"
+// @Success 200 {object} models.GroupResponse
+// @Router /api/groups/{id} [get]
+func (h *GroupHandler) GetGroup(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	group := new(models.Group)
-	if err := db.Where("id = ?", c.Param("id")).First(&group).Error; err != nil {
+	resGroup, err := h.groupService.GetGroup(uint(id))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": group})
+	c.JSON(http.StatusOK, gin.H{"data": resGroup})
 }
 
-func GetGroups(c *gin.Context) {
-	db := database.DB
-	var groups []models.Group
-
-	if err := db.Find(&groups).Error; err != nil {
+// GetGroups godoc
+// @Tags Groups
+// @Summary Return all groups
+// @Produce json
+// @Success 200 {object} models.GroupResponse
+// @Router /api/groups [get]
+func (h *GroupHandler) GetGroups(c *gin.Context) {
+	resGroups, err := h.groupService.GetGroups()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": groups})
+
+	c.JSON(http.StatusOK, gin.H{"data": resGroups})
 }

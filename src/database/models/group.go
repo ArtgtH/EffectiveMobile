@@ -2,21 +2,21 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"math/rand"
 )
 
 type Group struct {
 	gorm.Model
 	Title string
 	Songs []Song
-	Joke  int
 }
 
-type GroupDTO struct {
+type GroupRequest struct {
 	Title string `json:"title"`
+	Songs []Song `json:"songs"`
 }
 
-func (group *Group) BeforeCreate(_ *gorm.DB) error {
-	group.Joke = rand.Intn(100)
-	return nil
+type GroupResponse struct {
+	Id    uint   `json:"id"`
+	Title string `json:"title"`
+	Songs []Song `json:"songs"`
 }
