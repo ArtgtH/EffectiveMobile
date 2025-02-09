@@ -4,16 +4,18 @@ import (
 	"EffectiveMobile/src/app/services"
 	"EffectiveMobile/src/database/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 )
 
 type GroupHandler struct {
 	groupService *services.GroupService
+	validate     *validator.Validate
 }
 
-func NewGroupHandler(groupService *services.GroupService) *GroupHandler {
-	return &GroupHandler{groupService: groupService}
+func NewGroupHandler(groupService *services.GroupService, validator *validator.Validate) *GroupHandler {
+	return &GroupHandler{groupService: groupService, validate: validator}
 }
 
 // CreateGroup godoc
@@ -30,6 +32,11 @@ func (h *GroupHandler) CreateGroup(c *gin.Context) {
 	group := models.GroupRequest{}
 
 	if err := c.ShouldBindJSON(&group); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.validate.Struct(group); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

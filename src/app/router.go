@@ -3,6 +3,7 @@ package app
 import (
 	"EffectiveMobile/src/app/handlers"
 	"EffectiveMobile/src/app/services"
+	"EffectiveMobile/src/app/validator"
 	"EffectiveMobile/src/database"
 	"EffectiveMobile/src/database/repositories"
 	"github.com/gin-gonic/gin"
@@ -28,13 +29,15 @@ func InitRouter() *gin.Engine {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	validate := validator.NewValidator()
+
 	groupRepo := repositories.NewGroupRepository(db)
 	songRepo := repositories.NewSongRepository(db)
 
 	groupService := services.NewGroupService(groupRepo)
 	songService := services.NewSongService(songRepo, groupRepo)
 
-	groupHandler := handlers.NewGroupHandler(groupService)
+	groupHandler := handlers.NewGroupHandler(groupService, validate)
 	songHandler := handlers.NewSongHandler(songService, groupService)
 
 	api := router.Group("/api")

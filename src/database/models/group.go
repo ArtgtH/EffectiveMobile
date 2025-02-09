@@ -11,7 +11,7 @@ type Group struct {
 }
 
 type GroupRequest struct {
-	Title string `json:"title"`
+	Title string `json:"title" validate:"required"`
 	Songs []Song `json:"songs"`
 }
 
